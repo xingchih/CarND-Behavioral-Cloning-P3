@@ -46,7 +46,8 @@ def generator(samples, batch_size=32):
                 imgs.append(center_image)
                 angs.append(center_angle)
 
-                # data augmentation here
+                # data augmentation 
+                # flip images left and right
                 imgs.append(np.fliplr(center_image))
                 angs.append(-center_angle)
 
@@ -97,7 +98,7 @@ model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator, samples_per_epoch = len(train_samples),    \
                                      validation_data   = validation_generator,  \
                                      nb_val_samples    = len(validation_samples), 
-                                     nb_epoch          = 3)
+                                     nb_epoch          = 10)
 
 model.save('model.h5')
 
