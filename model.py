@@ -19,3 +19,14 @@ for line in lines:
 
     measurement = line[4]
     measurements.append(measurement)
+
+print('Total samples: {}' .format(len(measurements)))
+
+X_train = np.array(images)
+y_train = np.array(measurements)
+
+from keras.models import Sequential
+from keras.layers import Flatten, Dense
+
+model = Sequential()
+
