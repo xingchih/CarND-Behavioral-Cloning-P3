@@ -2,17 +2,58 @@ import csv
 import cv2
 import numpy as np
 
+from sklearn.model_selection import train_test_split
+
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten, Dropout, Cropping2D, Lambda
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 
+
+
+# parameters
 data_path = '../P3_data/recording2/'
 
-# hyper parameter
-kernel5 = 5
-kernel3 = 3
 
+csvpath = data_path + 'driving_log.csv'
+samples = []
+with open(csvpath) as csvfile:
+    reader = csv.reader(csvfile)
+    for line in reader:
+        samples.append(line)
+
+train_samples, validation_samples = train_test_split(samples, test_size=0.2)
+
+
+def generator(samples, batch_size=32):
+    num_samples = len(samples)
+    while 1: # Loop forever so the generator never terminates
+        shuffle(samples)
+        for offset in range(0, num_samples, batch_size):
+            batch_samples = samples[offset:offset+batch_size]
+
+            imgs = [] # images
+            angs = [] # steering angles
+            for batch_sample in batch_samples:
+                name = data_path = 'IMG/' + batch_sample[0].split('/')[-1]
+                center_image = cv2.imread(name)
+                center_angle = float(batch_sample[3])
+                imgs.append(center_image)
+                angs.append(center_angle)
+
+            # trim image to only see section with road
+            X_train = np.array(images)
+            y_train = np.array(angles)
+            yield sklearn.utils.shuffle(X_train, y_train)
+
+
+# compile and train the model using the generator function
+train_generator = generator(train_samples, batch_size=32)
+validation_generator = generator(validation_samples, batch_size=32)
+
+ch, row, col = 3, 80, 320  # Trimmed image format
+
+# hyper parameter
 lines = []
 csvpath = data_path + 'driving_log.csv'
 with open(csvpath) as csvfile:
@@ -60,17 +101,17 @@ model.add(Cropping2D(cropping=((70, 25), (0, 0))))
 
 # convolutional layers
 # conv 1 
-model.add(Convolution2D(24, kernel5, kernel5, activation="relu"))
+model.add(Convolution2D(24, 5, 5, subsample=(2,2), activation="relu"))
 #model.add(MaxPooling2D())
 # conv 2
-model.add(Convolution2D(36, kernel5, kernel5, activation="relu"))
+model.add(Convolution2D(36, 5, 5, subsample=(2,2), activation="relu"))
 #model.add(MaxPooling2D())
 # conv 3
-model.add(Convolution2D(48, kernel5, kernel5, activation="relu"))
+model.add(Convolution2D(48, 5, 5, subsample=(2,2), activation="relu"))
 # conv 4
-model.add(Convolution2D(64, kernel5, kernel5, activation="relu"))
+model.add(Convolution2D(64, 3, 3, activation="relu"))
 # conv 5
-model.add(Convolution2D(64, kernel5, kernel5, activation="relu"))
+model.add(Convolution2D(64, 3, 3, activation="relu"))
 
 # fully connected layers
 model.add(Flatten())
