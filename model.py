@@ -1,5 +1,4 @@
-import csv
-import cv2
+import csv, cv2, os
 import numpy as np
 
 from sklearn.model_selection import train_test_split
@@ -66,7 +65,7 @@ ch, row, col = 3, crop_btm-crop_top, 320  # Trimmed image format
 # set up the nvidia network here
 model = Sequential()
 # normalization and mean centering
-model.add(Lambda(lambda x:x/127.5 - 1.0, \
+model.add(Lambda(lambda x:x/255.0 - 0.5, \
             input_shape  = (row, col, ch), \
             output_shape = (row, col, ch)))
 
