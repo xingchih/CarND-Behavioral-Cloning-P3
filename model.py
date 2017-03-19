@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 from sklearn.model_selection import train_test_split
-
+from sklearn.utils import shuffle
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten, Dropout, Cropping2D, Lambda
 from keras.layers.convolutional import Convolution2D
@@ -13,7 +13,8 @@ from keras.layers.pooling import MaxPooling2D
 
 # parameters
 data_path = '../P3_data/recording2/'
-
+crop_top = 70;
+crop_btm = 135;
 
 csvpath = data_path + 'driving_log.csv'
 samples = []
@@ -35,69 +36,40 @@ def generator(samples, batch_size=32):
             imgs = [] # images
             angs = [] # steering angles
             for batch_sample in batch_samples:
-                name = data_path = 'IMG/' + batch_sample[0].split('/')[-1]
+                name = data_path + 'IMG/' + batch_sample[0].split('/')[-1]
                 center_image = cv2.imread(name)
+
+                # cropping
+                center_image = center_image[crop_top:crop_btm,:,:]
+
                 center_angle = float(batch_sample[3])
                 imgs.append(center_image)
                 angs.append(center_angle)
 
+                # data augmentation here
+                imgs.append(np.fliplr(center_image))
+                angs.append(-center_angle)
+
             # trim image to only see section with road
-            X_train = np.array(images)
-            y_train = np.array(angles)
-            yield sklearn.utils.shuffle(X_train, y_train)
+            X_train = np.array(imgs)
+            y_train = np.array(angs)
+            yield shuffle(X_train, y_train)
 
 
 # compile and train the model using the generator function
-train_generator = generator(train_samples, batch_size=32)
+train_generator      = generator(train_samples,      batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
-ch, row, col = 3, 80, 320  # Trimmed image format
-
-# hyper parameter
-lines = []
-csvpath = data_path + 'driving_log.csv'
-with open(csvpath) as csvfile:
-    reader = csv.reader(csvfile)
-    for line in reader:
-        lines.append(line)
-
-images = []
-measurements = []
-for line in lines:
-    source_path = line[0]
-    filename = source_path.split('/')[-1]
-    current_path = data_path + 'IMG/' + filename
-    image = cv2.imread(current_path)
-    images.append(image)
-
-    measurement = float(line[3])
-    measurements.append(measurement)
-
-# augment data
-images_aug, measurements_aug = [], []
-# flip images left right and reverse steering angle
-for image, measurement in zip(images, measurements):
-    images_aug.append(image)
-    images_aug.append(np.fliplr(image))
-
-    measurements_aug.append(measurement)
-    measurements_aug.append(-measurement)
-
-print('Total samples: {}' .format(len(measurements_aug)))
-
-X_train = np.array(images_aug)
-y_train = np.array(measurements_aug)
-
-print(X_train.shape)
-print(y_train.shape)    
+ch, row, col = 3, crop_btm-crop_top, 320  # Trimmed image format 
 
 model = Sequential()
 # normalization and mean centering
-model.add(Lambda(lambda x:x/255.0-0.5, input_shape = (160,320,3)))
-# -> normalized input planes 3@160x320
+model.add(Lambda(lambda x:x/127.5 - 1.0, \
+            input_shape  = (row, col, ch), \
+            output_shape = (row, col, ch)))
 
-# cropping
-model.add(Cropping2D(cropping=((70, 25), (0, 0))))
+# cropping applied in generator
+# model.add(Cropping2D(cropping=((70, 25), (0, 0))))
 
 # convolutional layers
 # conv 1 
@@ -122,9 +94,10 @@ model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
 
-
-
-model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch = 5)
+model.fit_generator(train_generator, samples_per_epoch = len(train_samples),    \
+                                     validation_data   = validation_generator,  \
+                                     nb_val_samples    = len(validation_samples), 
+                                     nb_epoch          = 3)
 
 model.save('model.h5')
 
