@@ -18,4 +18,4 @@ for line in lines:
     images.append(image)
 
     measurement = line[4]
-	measurements.append(measurement)
+    measurements.append(measurement)
