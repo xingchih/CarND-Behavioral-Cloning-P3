@@ -63,6 +63,7 @@ validation_generator = generator(validation_samples, batch_size=32)
 
 ch, row, col = 3, crop_btm-crop_top, 320  # Trimmed image format 
 
+# set up the nvidia network here
 model = Sequential()
 # normalization and mean centering
 model.add(Lambda(lambda x:x/127.5 - 1.0, \
@@ -93,13 +94,15 @@ model.add(Dense(50))
 model.add(Dense(10))
 model.add(Dense(1))
 
+# comppile model
 model.compile(loss='mse', optimizer='adam')
 
+# fit model
 model.fit_generator(train_generator, samples_per_epoch = len(train_samples),    \
                                      validation_data   = validation_generator,  \
                                      nb_val_samples    = len(validation_samples), 
                                      nb_epoch          = 10)
-
+# save model
 model.save('model.h5')
 
 
