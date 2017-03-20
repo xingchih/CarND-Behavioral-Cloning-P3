@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 data_path = '../P3_data/recording2/'
 
 correction = 0.5 # this is a parameter to tune
-num_epoch = 25
+num_epoch = 5
 crop_top = 70
 crop_btm = 25
 
@@ -55,7 +55,7 @@ def generator(samples, batch_size=32):
 
                 imgs.append(image_c)
                 angs.append(angle_c)
-                
+
                 imgs.append(image_l)
                 angs.append(angle_l)
 
@@ -118,16 +118,11 @@ model.add(Dense(1))
 model.compile(loss='mse', optimizer='adam')
 
 # fit model
-model.fit_generator(train_generator, samples_per_epoch = 6*len(train_samples),    \
-                                     validation_data   = validation_generator,  \
-                                     nb_val_samples    = 6*len(validation_samples), 
-                                     nb_epoch          = 10)
-
 history_object =    model.fit_generator(train_generator, 
                                         samples_per_epoch = 6*len(train_samples), \
                                         validation_data   = validation_generator, \
                                         nb_val_samples    = 6*len(validation_samples), \
-                                        nb_epoch          = 5, \
+                                        nb_epoch          = num_epoch, \
                                         verbose           = 1)
 
 ### print the keys contained in the history object
