@@ -7,8 +7,8 @@ from keras.models import Sequential, Model
 from keras.layers import Dense, Activation, Flatten, Dropout, Cropping2D, Lambda
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
-import matplotlib.pyplot as plt
-from keras.utils.visualize_util import plot
+#import matplotlib.pyplot as plt
+#from keras.utils.visualize_util import plot
 
 # parameters
 data_path = '../P3_data/recording2/'
@@ -128,20 +128,31 @@ history_object =    model.fit_generator(train_generator,
                                         nb_epoch          = num_epoch, \
                                         verbose           = 1)
 
+# save
+val_loss = history_object.history['val_loss']
+loss = history_object.history['loss']
+np.savetxt('model_training_history.txt', (val_loss, loss))
+
+# save model
+model.save('model.h5')
+
+
 ### print the keys contained in the history object
-print(history_object.history.keys())
+# print(history_object.history.keys())
 
 ### plot the training and validation loss for each epoch
 #plt.plot(history_object.history['loss'])
 #plt.plot(history_object.history['val_loss'])
+
+#val_loss, loss = np.loadtxt('model_training_history.txt')
+#plt.plot(loss)
+#plt.plot(val_loss)
 #plt.title('model mean squared error loss')
 #plt.ylabel('mean squared error loss')
 #plt.xlabel('epoch')
 #plt.legend(['training set', 'validation set'], loc='upper right')
 #plt.show()
 
-# save model
-#model.save('model.h5')
 
 
 
