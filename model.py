@@ -26,22 +26,6 @@ with open(csvpath) as csvfile:
 
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
-
-# create adjusted steering measurements for the side camera images
-            
-            steering_left = steering_center + correction
-            steering_right = steering_center - correction
-
-            # read in images from center, left and right cameras
-            directory = "..." # fill in the path to your training IMG directory
-            img_center = process_image(np.asarray(Image.open(path + row[0])))
-            img_left = process_image(np.asarray(Image.open(path + row[1])))
-            img_right = process_image(np.asarray(Image.open(path + row[2])))
-
-            # add images and angles to data set
-            car_images.extend(img_center, img_left, img_right)
-            steering_angles.extend(steering_center, steering_left, steering_right)
-
 def generator(samples, batch_size=32):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
@@ -101,7 +85,7 @@ model = Sequential()
 # normalization and mean centering
 #model.add(Flatten(input_shape=(row,col,ch)))
 model.add(Lambda(lambda x:x/127.5 - 1., \
-            input_shape  = (row, col, ch))
+            input_shape  = (row, col, ch)))
 
 # cropping applied in generator
 model.add(Cropping2D(cropping=((crop_top, crop_btm), (0, 0))))
