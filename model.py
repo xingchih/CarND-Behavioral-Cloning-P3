@@ -12,9 +12,10 @@ from keras.layers.pooling import MaxPooling2D
 
 # parameters
 data_path = '../P3_data/recording2/'
-correction = 0.35 # this is a parameter to tune
-crop_top = 70;
-crop_btm = 25;
+correction = 0.275 # this is a parameter to tune
+num_epoch = 25
+crop_top = 70
+crop_btm = 25
 ch, row, col = 3, 160, 320  # image format 
 
 csvpath = data_path + 'driving_log.csv'
@@ -118,7 +119,7 @@ model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator, samples_per_epoch = 6*len(train_samples),    \
                                      validation_data   = validation_generator,  \
                                      nb_val_samples    = 6*len(validation_samples), 
-                                     nb_epoch          = 10)
+                                     nb_epoch          = num_epoch)
 # save model
 model.save('model.h5')
 
