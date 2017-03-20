@@ -7,15 +7,14 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten, Dropout, Cropping2D, Lambda
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
-from keras.utils.visualize_util import plot
+
 
 
 # parameters
 data_path = '../P3_data/recording2/'
-correction = 0.275 # this is a parameter to tune
-num_epoch = 25
-crop_top = 70
-crop_btm = 25
+correction = 0.2 # this is a parameter to tune
+crop_top = 70;
+crop_btm = 25;
 ch, row, col = 3, 160, 320  # image format 
 
 csvpath = data_path + 'driving_log.csv'
@@ -26,6 +25,22 @@ with open(csvpath) as csvfile:
         samples.append(line)
 
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
+
+
+# create adjusted steering measurements for the side camera images
+            
+            steering_left = steering_center + correction
+            steering_right = steering_center - correction
+
+            # read in images from center, left and right cameras
+            directory = "..." # fill in the path to your training IMG directory
+            img_center = process_image(np.asarray(Image.open(path + row[0])))
+            img_left = process_image(np.asarray(Image.open(path + row[1])))
+            img_right = process_image(np.asarray(Image.open(path + row[2])))
+
+            # add images and angles to data set
+            car_images.extend(img_center, img_left, img_right)
+            steering_angles.extend(steering_center, steering_left, steering_right)
 
 def generator(samples, batch_size=32):
     num_samples = len(samples)
@@ -86,7 +101,7 @@ model = Sequential()
 # normalization and mean centering
 #model.add(Flatten(input_shape=(row,col,ch)))
 model.add(Lambda(lambda x:x/127.5 - 1., \
-            input_shape  = (row, col, ch)))
+            input_shape  = (row, col, ch))
 
 # cropping applied in generator
 model.add(Cropping2D(cropping=((crop_top, crop_btm), (0, 0))))
@@ -115,16 +130,13 @@ model.add(Dense(1))
 # comppile model
 model.compile(loss='mse', optimizer='adam')
 
-# visualize model layout with pydot_ng
-plot(model, to_file='model.png', show_shapes=True)
-
 # fit model
-#model.fit_generator(train_generator, samples_per_epoch = 6*len(train_samples),    \
-#                                     validation_data   = validation_generator,  \
-#                                     nb_val_samples    = 6*len(validation_samples), 
-#                                     nb_epoch          = num_epoch)
+model.fit_generator(train_generator, samples_per_epoch = 6*len(train_samples),    \
+                                     validation_data   = validation_generator,  \
+                                     nb_val_samples    = 6*len(validation_samples), 
+                                     nb_epoch          = 10)
 # save model
-#model.save('model.h5')
+model.save('model.h5')
 
 
 
