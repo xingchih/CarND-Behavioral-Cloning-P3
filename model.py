@@ -12,7 +12,7 @@ from keras.layers.pooling import MaxPooling2D
 
 # parameters
 data_path = '../P3_data/recording2/'
-correction = 0.275 # this is a parameter to tune
+correction = 0.5 # this is a parameter to tune
 num_epoch = 25
 crop_top = 70
 crop_btm = 25
