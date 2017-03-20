@@ -1,3 +1,7 @@
+# carnd-p4
+# behavior cloning
+# xingchi he
+
 import csv, cv2, os
 import numpy as np
 
@@ -14,7 +18,7 @@ from keras.layers.pooling import MaxPooling2D
 data_path = '../P3_data/recording2/'
 
 correction = 0.5 # this is a parameter to tune
-num_epoch = 20
+num_epoch = 5
 crop_top = 70
 crop_btm = 25
 
@@ -46,13 +50,11 @@ def generator(samples, batch_size=32):
                 image_l = cv2.imread(name_l) # left image
                 image_r = cv2.imread(name_r) # right image
 
-                # cropping
-                #center_image = center_image[crop_top:crop_btm,:,:]
-
                 angle_c = float(batch_sample[3]) # center steering angle
                 angle_l = angle_c + correction # left corrected steering anlge
                 angle_r = angle_c - correction # right corrected steering angle
 
+                # add camera images and their steering angles
                 imgs.append(image_c)
                 angs.append(angle_c)
 
@@ -73,7 +75,6 @@ def generator(samples, batch_size=32):
                 imgs.append(np.fliplr(image_r))
                 angs.append(-angle_r)
 
-            # trim image to only see section with road
             X_train = np.array(imgs)
             y_train = np.array(angs)
             yield shuffle(X_train, y_train)
@@ -86,26 +87,34 @@ validation_generator = generator(validation_samples, batch_size=32)
 # set up the nvidia network here
 model = Sequential()
 # normalization and mean centering
-#model.add(Flatten(input_shape=(row,col,ch)))
 model.add(Lambda(lambda x:x/127.5 - 1., \
             input_shape  = (row, col, ch)))
+# output 3@160x320
 
 # cropping applied in generator
 model.add(Cropping2D(cropping=((crop_top, crop_btm), (0, 0))))
+# output 3@65x320
 
 # convolutional layers
 # conv 1 
 model.add(Convolution2D(24, 5, 5, subsample=(2,2), activation="relu"))
-#model.add(MaxPooling2D())
+# output 24@31x158
+
 # conv 2
 model.add(Convolution2D(36, 5, 5, subsample=(2,2), activation="relu"))
-#model.add(MaxPooling2D())
+# output 36@14x77
+
 # conv 3
 model.add(Convolution2D(48, 5, 5, subsample=(2,2), activation="relu"))
+# output 48@5x37
+
 # conv 4
 model.add(Convolution2D(64, 3, 3, activation="relu"))
+# output 64@5x37
+
 # conv 5
 model.add(Convolution2D(64, 3, 3, activation="relu"))
+# output 3@5x37
 
 # fully connected layers
 model.add(Flatten())
