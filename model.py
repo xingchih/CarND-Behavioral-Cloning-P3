@@ -8,7 +8,7 @@ from keras.layers import Dense, Activation, Flatten, Dropout, Cropping2D, Lambda
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 import matplotlib.pyplot as plt
-
+from keras.utils.visualize_util import plot
 
 # parameters
 data_path = '../P3_data/recording2/'
@@ -117,6 +117,9 @@ model.add(Dense(1))
 # comppile model
 model.compile(loss='mse', optimizer='adam')
 
+# visualize model
+# plot(model, 'model.png')
+
 # fit model
 history_object =    model.fit_generator(train_generator, 
                                         samples_per_epoch = 6*len(train_samples), \
@@ -129,16 +132,16 @@ history_object =    model.fit_generator(train_generator,
 print(history_object.history.keys())
 
 ### plot the training and validation loss for each epoch
-plt.plot(history_object.history['loss'])
-plt.plot(history_object.history['val_loss'])
-plt.title('model mean squared error loss')
-plt.ylabel('mean squared error loss')
-plt.xlabel('epoch')
-plt.legend(['training set', 'validation set'], loc='upper right')
-plt.show()
+#plt.plot(history_object.history['loss'])
+#plt.plot(history_object.history['val_loss'])
+#plt.title('model mean squared error loss')
+#plt.ylabel('mean squared error loss')
+#plt.xlabel('epoch')
+#plt.legend(['training set', 'validation set'], loc='upper right')
+#plt.show()
 
 # save model
-model.save('model.h5')
+#model.save('model.h5')
 
 
 
