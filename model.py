@@ -71,7 +71,7 @@ model.add(Lambda(lambda x:x/255.0 - 0.5, \
             output_shape = (row, col, ch)))
 
 # cropping applied in generator
-# model.add(Cropping2D(cropping=((70, 25), (0, 0))))
+model.add(Cropping2D(cropping=((70, 25), (0, 0))))
 
 # convolutional layers
 # conv 1 
@@ -98,9 +98,9 @@ model.add(Dense(1))
 model.compile(loss='mse', optimizer='adam')
 
 # fit model
-model.fit_generator(train_generator, samples_per_epoch = len(train_samples),    \
+model.fit_generator(train_generator, samples_per_epoch = 2*len(train_samples),    \
                                      validation_data   = validation_generator,  \
-                                     nb_val_samples    = len(validation_samples), 
+                                     nb_val_samples    = 2*len(validation_samples), 
                                      nb_epoch          = 10)
 # save model
 model.save('model.h5')
