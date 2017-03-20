@@ -39,7 +39,7 @@ def generator(samples, batch_size=32):
                 center_image = cv2.imread(name)
 
                 # cropping
-                center_image = center_image[crop_top:crop_btm,:,:]
+                #center_image = center_image[crop_top:crop_btm,:,:]
 
                 center_angle = float(batch_sample[3])
                 imgs.append(center_image)
@@ -61,10 +61,11 @@ train_generator      = generator(train_samples,      batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
 ch, row, col = 3, crop_btm-crop_top, 320  # Trimmed image format 
-
+row = 160
 # set up the nvidia network here
 model = Sequential()
 # normalization and mean centering
+#model.add(Flatten(input_shape=(row,col,ch)))
 model.add(Lambda(lambda x:x/255.0 - 0.5, \
             input_shape  = (row, col, ch), \
             output_shape = (row, col, ch)))
@@ -100,7 +101,7 @@ model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator, samples_per_epoch = len(train_samples),    \
                                      validation_data   = validation_generator,  \
                                      nb_val_samples    = len(validation_samples), 
-                                     nb_epoch          = 10)
+                                     nb_epoch          = 3)
 # save model
 model.save('model.h5')
 
