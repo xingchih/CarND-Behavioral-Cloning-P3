@@ -7,7 +7,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten, Dropout, Cropping2D, Lambda
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
-
+from keras.utils.visualize_util import plot
 
 
 # parameters
@@ -115,13 +115,16 @@ model.add(Dense(1))
 # comppile model
 model.compile(loss='mse', optimizer='adam')
 
+# visualize model layout with pydot_ng
+plot(model, to_file='model.png', show_shapes=True)
+
 # fit model
-model.fit_generator(train_generator, samples_per_epoch = 6*len(train_samples),    \
-                                     validation_data   = validation_generator,  \
-                                     nb_val_samples    = 6*len(validation_samples), 
-                                     nb_epoch          = num_epoch)
+#model.fit_generator(train_generator, samples_per_epoch = 6*len(train_samples),    \
+#                                     validation_data   = validation_generator,  \
+#                                     nb_val_samples    = 6*len(validation_samples), 
+#                                     nb_epoch          = num_epoch)
 # save model
-model.save('model.h5')
+#model.save('model.h5')
 
 
 
